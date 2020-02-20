@@ -4,7 +4,10 @@ import random
 class Game:
     def __init__(self):
         self.user_choice = ""
-        self.choices = ["rock", "paper", "scissors"]
+        self.default_options = ["rock", "paper", "scissors"]
+        self.user_options = []
+        self.winning_options = []
+        self.losing_options = []
         self.computer_choice = ""
         self.play_game = True
         self.scoreboard = {}
@@ -23,6 +26,15 @@ class Game:
     def get_name(self):
         return self.user_name
 
+    def get_options(self):
+        if not self.user_options:
+            return self.default_options
+        else:
+            return self.user_options
+
+    def get_winning(self):
+        return self.winning_options
+
     def set_choice(self, new_choice):
         self.user_choice = new_choice
 
@@ -31,6 +43,17 @@ class Game:
 
     def set_name(self, new_name):
         self.user_name = new_name
+
+    def set_options(self):
+        options = input().replace(' ', '')
+        if options != "":
+            self.user_options = options.split(',')
+            if len(self.user_options) % 2 == 0:
+                del(self.user_options[0])
+        print("Okay, let's start")
+
+    def set_winning(self, winning):
+        self.winning_options = winning
 
     def greeting(self):
         self.set_name(input("Enter your name: ").strip())
@@ -72,8 +95,9 @@ class Game:
 
     def random_choice(self):
         random.seed()
-        index = random.randint(0, 2)
-        self.computer_choice = self.choices[index]
+        options = self.get_options()
+        index = random.randint(0, len(options) - 1)
+        self.computer_choice = options[index]
         return self.computer_choice
 
     def loose(self):
@@ -89,22 +113,19 @@ class Game:
         if self.get_choice() == self.computer_choice:
             print(f"There is a draw ({self.get_choice()})")
             self.outcome = "draw"
-        elif self.get_choice() == "rock":
-            if self.computer_choice == "paper":
-                self.loose()
-            elif self.computer_choice == "scissors":
-                self.win()
-        elif self.get_choice() == "paper":
-            if self.computer_choice == "scissors":
-                self.loose()
-            elif self.computer_choice == "rock":
-                self.win()
-        elif self.get_choice() == "scissors":
-            if self.computer_choice == "rock":
-                self.loose()
-            elif self.computer_choice == "paper":
-                self.win()
+        elif self.computer_choice in self.get_winning():
+            self.win()
+        else:
+            self.loose()
         game.update_score()
+
+    def evaluate_options(self):
+        user_word = self.get_options().index(self.get_choice())
+        options = self.get_options()
+        if user_word - len(options) // 2 >= 0:
+            self.set_winning(options[user_word - len(options) // 2: user_word])
+        elif user_word - len(options) // 2 < 0:
+            self.set_winning(options[user_word + 1:user_word + len(options) // 2 + 1])
 
     def game_loop(self):
         while self.play_game is True:
@@ -115,10 +136,13 @@ class Game:
             elif self.get_choice() == '!rating':
                 self.print_rating()
             else:
+                self.evaluate_options()
                 self.game_result()
 
 
 game = Game()
 game.write_score_from_file()
 game.greeting()
+game.set_options()
 game.game_loop()
+game.update_score()
