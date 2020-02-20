@@ -42,8 +42,9 @@ class Game:
     def save_score(self):
         save_file = open('rating.txt', 'w')
         for key, value in self.scoreboard.items():
-            print(save_file)
-            print(key, value, file=save_file, flush=True)
+            content = key + " " + str(value) + "\n"
+            save_file.write(content)
+            save_file.flush()
         save_file.close()
 
     def write_score_from_file(self):
@@ -75,6 +76,14 @@ class Game:
         self.computer_choice = self.choices[index]
         return self.computer_choice
 
+    def loose(self):
+        print(f"Sorry, but computer chose {self.computer_choice}")
+        self.outcome = "loose"
+
+    def win(self):
+        print(f"Well done. Computer chose {self.computer_choice} and failed")
+        self.outcome = "win"
+
     def game_result(self):
         self.random_choice()
         if self.get_choice() == self.computer_choice:
@@ -82,25 +91,19 @@ class Game:
             self.outcome = "draw"
         elif self.get_choice() == "rock":
             if self.computer_choice == "paper":
-                print(f"Sorry, but computer chose {self.computer_choice}")
-                self.outcome = "loose"
+                self.loose()
             elif self.computer_choice == "scissors":
-                print(f"Well done. Computer chose {self.computer_choice} and failed")
-                self.outcome = "win"
+                self.win()
         elif self.get_choice() == "paper":
             if self.computer_choice == "scissors":
-                print(f"Sorry, but computer chose {self.computer_choice}")
-                self.outcome = "loose"
+                self.loose()
             elif self.computer_choice == "rock":
-                print(f"Well done. Computer chose {self.computer_choice} and failed")
-                self.outcome = "win"
+                self.win()
         elif self.get_choice() == "scissors":
             if self.computer_choice == "rock":
-                print(f"Sorry, but computer chose {self.computer_choice}")
-                self.outcome = "loose"
+                self.loose()
             elif self.computer_choice == "paper":
-                print(f"Well done. Computer chose {self.computer_choice} and failed")
-                self.outcome = "win"
+                self.win()
         game.update_score()
 
     def game_loop(self):
@@ -116,5 +119,6 @@ class Game:
 
 
 game = Game()
+game.write_score_from_file()
 game.greeting()
 game.game_loop()
